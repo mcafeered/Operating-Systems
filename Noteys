@@ -1,1 +1,20 @@
+======================== POWERSHELL ================================
+
+most wmiobjects are Win32_ (means they only works on windows) which pulls information straight from the kernel about objects as opposed to just running the normal command to receive that information 
+
+should not see pipes when viewing the processes
+
+there are differences between user profiles in Powershell, Powershell ISE, and the newest version of powershell
+start powershell -noprofile will load powershell without a profile
+look for a powershell command ran with -windowstyle Hidden which means something is being hidden from you
+can also change the version of the powershell you are about to run with -version <version number>
+
+get-item WSMAN:\localhost\client\trustedhosts ping trusted hosts that can be Winrm'd into, can also use set item instead of give to set a trusted host make sure to add -concatenate to add as opposed to overwrite
+
+invoke-command -comptername pwnd_host { restart-computer } -asjob 
+invoke-command -computername a workstation,server C:\windows\findevil.ps1 
+invoke-command is used to run commands remotely on other workstations with a small session while new-pssession which creates a more permanent session with the remote device
+
+
+
 
