@@ -44,5 +44,29 @@ Security contains the lsass configuration data
 System has the boot or driver startup applications
 Software has the system wide user downloaded applications 
 
+the S-1-5-18 account is local system
+the S-1-5-19 account is local service
+the S-1-5-20 account is networking account
 
+the 21 in a user account represents the domain while the numbers after represent the machine they are on and what order they were created in
 
+Files are needed to store registry values to load them on every boot
+user setting are stored in the NTUSER.DAT file for every user which is the user's registry settings
+system settings are stored in the system32/config file which stores the registry settings where RegBack is the registry backup file
+
+for the GUI regedit is used to manipulate the registry and add/delete keys or change data
+data we use primarily is string, binary, and DWORD which can provide either a decimal or hexadecimal 32 bit value (QWORD for 64 bit)
+
+subkeys can also be saved to export/import entire subkeys to other systems
+
+to use the cmd to edit registry values use reg along with a command like ADD or DELETE 
+reg query does not take astericks (and wildcards in general) which means you would have to take each individual sid using reg query
+
+powershell uses get-item to just get KEYS and what their name is/data associated with them
+get-childitem gives the subkeys for a key using -recurse to get all the subkeys as well as registry values and data ex get-childitem HKLM:\
+set-itemproperty -path HKLM:\software\microsoft\windows\currentversion\run\etc.(any key/path) -name <name of registry value> -value <data to put in value>
+new-itemproperty works the same as set-itemproperty but creates a new value
+
+use get-psdrive gets the currently mounted filesystems then use new-PSdrive -name HKU -PSProvider registry -root HKEY_Users to mount the HKU as a PSDRIVE to view in powershell 
+use add-content "<previous command>" $profile.allusersallhosts to add it to the users profiles then run &$profile.allusersallhosts to reload the file without restarting powershell
+can alternatively just use registry::HKEY_Users instead of creating a new key to specify that its a registry path not a filesystem in PSDRIVE
