@@ -15,6 +15,34 @@ invoke-command -comptername pwnd_host { restart-computer } -asjob
 invoke-command -computername a workstation,server C:\windows\findevil.ps1 
 invoke-command is used to run commands remotely on other workstations with a small session while new-pssession which creates a more permanent session with the remote device
 
+========================== WINDOWS REGISTRY ==============================
+
+the registry is a heirarchial database that stores system wide settings as well as profile settings
+
+hive keys always start with HKEY and are the main big groups of data like HKEY_Current_User or HKEY_Local_Machine
+Registry keys are basically directories or subdirectories (subkeys) 
+Registry values are the actual entries that contain data which can be read
+
+HKEY_CLASSES_ROOT is a symbolic link to the classes subkey in in HKEY_Local_Machine which contains all the file extensions and what file pertains to them
+ren can rename file extensions to change their extension to whatever you want ex calc.exe to calc.lol
+classes have to have a default key with an actual value which defaults to string upon creation unless specified otherwise
+the default key in classes describes what the files with said extension should be treated like ex an exefile which is executable which also needs a specific designation since there are many different executable types in windows
+
+HKEY_Local_Machine is just the local machine settings
+
+HKEY_CurrentUser is a symbolic link to the HKEY_Users key containing the settings for the currently logged in user
+
+HKEY_Users has the normal settings for every user sorted by their sid and a classes key which specifies how you choose to open your extensions
+
+only Admins can open and change any other HKEY then the one for their user account
+
+HKEY_LOCAL_MACHINE KEYS
+even administrators cant view the SAM key which holds security tokens and usernames for every user account
+BCD00000000 deals with the boot configuration of the system
+Hardware has drivers and other such hardware related data
+Security contains the lsass configuration data
+System has the boot or driver startup applications
+Software has the system wide user downloaded applications 
 
 
 
