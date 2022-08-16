@@ -70,3 +70,14 @@ new-itemproperty works the same as set-itemproperty but creates a new value
 use get-psdrive gets the currently mounted filesystems then use new-PSdrive -name HKU -PSProvider registry -root HKEY_Users to mount the HKU as a PSDRIVE to view in powershell 
 use add-content "<previous command>" $profile.allusersallhosts to add it to the users profiles then run &$profile.allusersallhosts to reload the file without restarting powershell
 can alternatively just use registry::HKEY_Users instead of creating a new key to specify that its a registry path not a filesystem in PSDRIVE
+on powershell can use wildcards like asterick* to query multiple values like all users ex get-item HKU:\*\<path>
+
+HKLM\SOFTWARE\microsoft\windows\currentversion\profilelist contains a list of all users that have logged in
+HKLM\SOFTWARE\microsoft\windows\currentversion\Image File Execution File Options tells a file what to do every single time it is executed
+files can be created in Image File Execution to run other commands using the dataname Debugger then given it a executable path as data, though doing this requires real time monitoring to be disabled since this is a well known exploit
+after performing this exploit you can go to the lock screen and click the ease of access button to open a command prompt as the system authority
+
+use set-mppreference -DisableRealTimeMonitoring $True to disable windows defenders ability to prevent the previously described exploit
+
+
+
