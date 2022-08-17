@@ -79,5 +79,17 @@ after performing this exploit you can go to the lock screen and click the ease o
 
 use set-mppreference -DisableRealTimeMonitoring $True to disable windows defenders ability to prevent the previously described exploit
 
+========================================== WINDOWS ADS (Alternate Data Stream) ===================================
 
+windows uses NTFS (new technology file system) as its default which allows a lot more partitions (26 primary) and over a terrabyte of storage 
+Windows used to use FAT (file allocation table) with only 4 partitions per hard drive followed by exFAT which still only held 16
+NTFS added ADS to windows which allows data to be stealthily added to other data 
+ADS can be used to create an invisible file that slowly fills up your hard drive without showing it on the GUI which eventually crashes the kernel
+ADS works for antivirus and sequel servers
+ADS must be viewed through the CLI since they dont show up in the GUI 
+Create an ADS using for example echo "Elden Ring does deserve GOTY" > something.exe:truth.txt
+
+to see ADS with powershell you have to get-item .\something.exe -stream * to check individual files followed by get-content .\calc.fuk -stream truth.txt to read it
+you need a whole dang script to read through files in a directory to find ADS ex. 
+get-childitem <path> | foreach-object { get-item $_.fullName -stream * } | where { $_.stream -ne $DATA } | get-content (to read it if ya need it) 
 
