@@ -132,9 +132,23 @@ SUID is a bit that will be in the user permission part of the permissions sectio
 SGID lets you run with the permissions of the group specified (same as suid but groups)
 STICKY BIT any file thats created with access via a group can only be deleted by the creator of said file
 
+SCRIPTING
+man --help provides options
+man -k (keyword search) to find specific commands
+apropos is also a keyword search
+whereis locates commands through source and binary files (use -b for binary)
 
+SHELLS 
+echo $0 prints your shell if its cosix compliant
+sh has no history file when writing commands
+use cat /etc/shells to view all usable shells on the machine
 
-
-
+FOR LATER
+ifconfig is deprecated, now ip addr / ip a is used for interfaces and their ip addresses, mac addresses, statuses, etc.
+netstat -ntlp shows ports and their status on the machine, you could also use ss -ntlp (could remove the n to get actual names of service ports) (l makes it only print listening ports)
+can sudo for ports to see what processes are being used for said ports 
+ip route, ip r, route shows what routes and interfaces are used to connect to particular networks
+arp, ip neigh, ip n shows what the machine has comminicated with recently and whether it is still reachable or not
+check firewalls using iptables -l to view the rules
 
 
