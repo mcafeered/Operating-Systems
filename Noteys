@@ -93,3 +93,48 @@ to see ADS with powershell you have to get-item .\something.exe -stream * to che
 you need a whole dang script to read through files in a directory to find ADS ex. 
 get-childitem <path> | foreach-object { get-item $_.fullName -stream * } | where { $_.stream -ne $DATA } | get-content (to read it if ya need it) 
 
+========================================== LINUX ==========================================
+
+BASIC QUESTIONS TO ASK IMMEDIATELY
+hostname and uname -a are used to find out where u are 
+find out who you are using whoami and id command (gives user/group sid and username)
+use sudo -l to see what you can and cant do on your machine
+run w, who, ps -elf to find out who is on the system and whats going on
+mark down anything interesting and figure out why its happening, how its happening, and what it is 
+assuming this leads you to something human-readable, find out what's in there
+
+FILESYSTEM HEIRARCHY
+
+everything starts at Root /
+/bin is for standard binary commands that dont require system access to run (can be /usr/bin, or /usr/local/bin depending on the machine)
+/sbin is for system binaries that require system permissions to use (can be /usr/sbin depending on the machine)
+/home is the default directory for any given user's home
+/usr universal system resources, the catch all for all system files designed for us on the entire system on a given box
+/etc everthing thats configurable, catch all for system level configuration files like shadow or passwd
+/var files that are likely to change ex. logs
+/boot all the files that are read during boot 
+/dev all special device related files that reference specific devices like keyboards or mouses
+/lib functions that are needed for given applications to run
+/mnt used for permanently attatched external storage
+/media removable media like usb's
+/opt reserved for any files the user downloads themselves
+/run runtime and variable data which holds information on the current session being run (mounted during boot) 
+/tmp temporary files (everyone has access)
+/proc processes (this is where ps -elf gets it's information to display)
+
+USERS AND GROUPS (and permissions)
+
+all users are held in /etc/passwd with their uid and guid
+groups can be checked on the file /etc/groups in the format groupname:passwd placeholder:GID:who uses it as a supplementary group
+ls -lisa shows the owner of and permissions for files (permissions formatted in UGO (user group other) with read write execute permissions) with the field after the permissions being the user and the group
+
+SUID is a bit that will be in the user permission part of the permissions section signified with an s which allows anyone to execute as root (in passwd still only lets you change your data)
+SGID lets you run with the permissions of the group specified (same as suid but groups)
+STICKY BIT any file thats created with access via a group can only be deleted by the creator of said file
+
+
+
+
+
+
+
