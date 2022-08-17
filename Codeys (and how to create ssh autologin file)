@@ -1,0 +1,11 @@
+how to create a ssh file which automatically sign in to ssh for you
+
+vim .ssh/config
+
+Host linops
+    HostName 10.50.36.73
+    User student
+    Port 22
+
+then chmod 600 .ssh/config
+
