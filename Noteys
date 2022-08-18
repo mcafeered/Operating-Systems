@@ -151,4 +151,53 @@ ip route, ip r, route shows what routes and interfaces are used to connect to pa
 arp, ip neigh, ip n shows what the machine has comminicated with recently and whether it is still reachable or not
 check firewalls using iptables -l to view the rules
 
+================================= Windows Boot Process ================================
+
+POST is what happens right after a windows device is turned on to check for hardware and confirm its existence
+
+BIOS(older) which uses the MBR or UEFI(newer) which uses the GPT is the next step
+
+BIOS loads the entire OS while UEFI (uses bootmgrfw.efi) is faster and has a secure boot which makes sure the current OS is the same as the initial OS on the system and makes sure no malware was downloaded since the last shutdown
+UEFI is loaded into flash memory making it easier for updating and patching with 9 zettabytes of drive support
+UEFI uses GPT (guid partition table) which checks for GPT in the current drive, if not found it asks the bootmgrfw.efi where GPT is in a UFI partition that goes straight to the boot manager that loads winload.efi or winresume.efi which loads the kernel on NtOSKRNL
+
+BIOS looks for the MBR(first 512 bytes in the hard drive) which contains the code to start Bootmgr which manages the boot process and loads the boot configuration data store which keeps track of how the OS will load and what OS is installed on the machine
+winload.exe(cold starts) which uses the BCD data which is bootconfiguration data or winresume.exe(sleeping/locking machine (warmstart)) load the Kernel (winresume.exe points to where the current data of machine state is stored in C:\ drive which saves how the computer was prior to locking it or not completly shutting it down)
+Restarts turn off the entire OS and use winload as opposed to a fast start which uses winresume which means extra data has to be saved and loaded saving the machines previous state
+
+after either UEFI or BIOS loads the kernel loads several files like paging the pagefile which stores less important information to be loaded at startup outside of RAM along with several other files owned by the kernel
+the process manager is started by the kernel which starts the system idle process which displays the available resources left for CPU,Memory,Disk,etc. for your machine as a kernel process
+
+NTOSKRNL starts a process called System which then loads smss.exe which loads sessions for login of up to multiple users
+smss.exe makes a copy of itself for each user session starting with session 0 which is system and separate from other actual user sessions, this first session has SMSS run CSRSS.exe and WININIT.exe
+WININIT runs LSASS.exe(user authentication (compare credentials with SAM)) and services.exe which launches SVCHOST.exe(the service that hosts services) which are used for initialization of windows
+for actual user sessions(1 and up) SMSS runs CSRSS.exe and WINLOGON.exe
+WINLOGON (which sends given credentials to a sub-process of LSASS proted to the given session) runs LOGONUI.exe(actual user interface) and USERINIT.exe(runs explorer upon authentication) which loads the Explorer.exe (kills userinit once its done) which is the GUI for the user and officially ends the boot process
+0-1000 PIDS are process IDS reserved for system, meaning all session 0 processes are below 1000 and 3 user related sessions are created with system privileges in order to run correctly which are SMSS, CSSRS, and WINLOGON which are almost immediately closed once they are done executing
+CSSRS allows windows to request services from other machines like servers to use for example DNS 
+
+Type C:\Windows\Panther\setupact.log | findstr /i "Detected boot environment" can find whether the system booted with Bios or Uefi(using powershell)
+or
+bcdedit | findstr /i winload (or winresume) can find UEFI or BIOS mode and whether it was a warm or cold start
+or 
+msinfo32 which spawns a GUI that shows the BIOS mode (legacy is bios while UEFI is uefi)
+
+\Device\HarddiskVolume1 is the true path of C:\ which can change
+
+bcdedit allows the viewing and manipulation of BCD data
+
+bcdedit prints the boot manager and some other basic information, the identifier being the most important field identifying what information is being displayed
+device defines where in the system the identifier is being used
+path shows what process was used 
+
+bcdedit /set can change data values
+
+bcdedit /set safeboot minimal makes the system boot in safemode at the most minimal level ex. just a command prompt and the bare minimum amount of data and services
+
+bcdedit /set safeboot Network still gives a basic shell (cli powershell) but also loads network resources allowing for online use
+
+bcdedit /set safebootalternateshell allows other shells besides cli or powershell like bash
+bcdedit /deletevalue safeboot and /deletevalue safebootalternateshell will make the GUI run normally again
+alternatively msconfig (can be typed in cli) can be brought up as a GUI then the boot settings can be changed to uncheck safeboot for the current OS
+msconfig also lets you view services (both microsoft and not) and enable or disable them
 
