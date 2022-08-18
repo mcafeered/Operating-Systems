@@ -176,6 +176,8 @@ WINLOGON (which sends given credentials to a sub-process of LSASS proted to the 
 0-1000 PIDS are process IDS reserved for system, meaning all session 0 processes are below 1000 and 3 user related sessions are created with system privileges in order to run correctly which are SMSS, CSSRS, and WINLOGON which are almost immediately closed once they are done executing
 CSSRS allows windows to request services from other machines like servers to use for example DNS 
 
+SAS is what forces you to press CTRL+ALT+DELETE to start authenticating
+
 Type C:\Windows\Panther\setupact.log | findstr /i "Detected boot environment" can find whether the system booted with Bios or Uefi(using powershell)
 or
 bcdedit | findstr /i winload (or winresume) can find UEFI or BIOS mode and whether it was a warm or cold start
@@ -200,4 +202,7 @@ bcdedit /set safebootalternateshell allows other shells besides cli or powershel
 bcdedit /deletevalue safeboot and /deletevalue safebootalternateshell will make the GUI run normally again
 alternatively msconfig (can be typed in cli) can be brought up as a GUI then the boot settings can be changed to uncheck safeboot for the current OS
 msconfig also lets you view services (both microsoft and not) and enable or disable them
+
+hiberfile.sys is for hibernation file saving
+
 
