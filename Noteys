@@ -246,6 +246,7 @@ SystemD - systemctl cat graphical.target will show the location and wants needs 
 /etc/profile(for logins, can be used for persistence and making any changes to all users login) is the profile for any given user while /etc/environment contains all the global variables and scripts cat /etc/profiles shows a script with all your options while cat /etc/environment show the paths to all the files it uses
 /etc/profile (etc/profile is global but uses an individuals .profile) and your individual $HOME/.profile(or .bash_profile) file in your home directory are for interactive login shells
 /etc/environment and $HOME/.bashrc are used for interactive non-login shells like starting up a terminal without logging in to a profile in said terminal
+/etc/profile.d contains all the scripts /etc/profile runs
 
 *Minas_Tirth is SysV while Terra is SystemD*
 
