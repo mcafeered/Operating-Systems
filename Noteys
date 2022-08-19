@@ -238,7 +238,7 @@ sudo parted -l can check where the bios is and check for bios or uefi which will
 *THE MBR IS ALWAYS THE FIRST 512 BYTES OF YOUR VDA OR SDA DISK*
 sudo dd if=/dev/sda(what disk to copy) of=MBRcopy(what to call it) bs=1(block size) count=512(number of bytes) this command copies a set amount of bytes of a disk to another file
 dd creates an exact copy of the actual disk space copied and is literally the disk as a file (use file to prove it)
-SystemD - uses systemctl to execute commands like systemctl list-dependecies graphical.target to see what processes your current target is running while also getting wants by everything before the first target in the service/process list
+SystemD - uses systemctl to execute commands like systemctl list-dependecies graphical.target to see what processes your current target is running while also getting wants by everything before the first target in the service/process list and after displays what the unit wants to run
 SystemD - systemctl show -p Wants graphical.target will also show all the wants of any given target
 SystemD - systemctl list-unit-files will list all the unit files and their status where transient is temporary where units are the classifications/organization of services/processes being run by SystemD
 SystemD - systemctl cat graphical.target will show the location and wants needs etc of a unit
