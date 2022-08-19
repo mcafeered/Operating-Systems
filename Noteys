@@ -205,4 +205,49 @@ msconfig also lets you view services (both microsoft and not) and enable or disa
 
 hiberfile.sys is for hibernation file saving
 
+=================================== LINUX Boot Process ========================================
+
+Linux brings back BIOS and UEFI which again both use the MBR and GPT
+- the boot loader is started by either BIOS or UEFI to find grub and start it
+
+This time grub or grub.efi is started by the MBR or GPT to start the Linux kernel 
+- grub finds the kernel image and starts it (config file is /boot/grub/menu.lst (old) actually look for /boot/grub/grub.cfg which contains the code for the GUI) and can be configured during boot via a GUI that appears, it can alter boot entreis, selecting different kernels, and modify initial ram disk
+
+The kernel starts init which forks off either to SysV or SystemD (the kernel maintains the interaction between the user and the os)
+- The Kernel initializes devices/drivers, mounts the filesystem, starts the program /sbin/init, and then init starts the rest of the system based off its runlevel
+- The kernel has modules in order to run hardware devices which can be viewed using the lsmod command (the kernel itself is process 0 while it starts a daemon [kthreadd] with a pid of 2)
+
+ls -l /sbin/init will show whether the system id systemD or SysV by whether there is a link to SystemD or not
+
+Init is the service and process manager of all services/processes on the system
+SysV - uses runlevels and can only start stop and pause said processes/services and runs everything in order handled by scripts being viewable via ls /etc/rc(0-6).d which specifies what scripts are run for each runlevel with /etc/init.d containing the actual scripts while the rc's contain links
+SysV - default runlevel is 5 for multi-user network and GUI, runlevel 0 is halt, runlevel 1 is single-user, runlevel 2-5 are multi-user, and runlevel 6 is reboot which can be viewed using cat /etc/inittab
+SysV - 2 = multiuser no networking, 3 = full multiuser with networking, 4 = full multiuser with networking and custom config, 5 full multiuser with with netowrking and GUI
+SystemD - loads system in parallel from binaries to load the processes/services much faster than init with targets similar to runlevels in init
+SystemD - SystemD can do a lot more than init like boot, login, move home directory, etc. ls -lisa /lib/systemd/system/default.target prints the default target which should be graphical.target for the gui
+SystemD - uses targets like graphical.target as runlevels which can be viewed by using cat /lib/systemd/system/default.target to see what options it takes under the [Unit] header (requires = what target it needs while wants = what services can be ignored, conflicts = what services cant be running during initialization) 
+SystemD - can have multiple folders for system processes like /etc/systemd/system, /lib/systemd/system, and /usr/lib/systemd/system which can all be ls -lisa'd
+
+COMMANDS
+lsblk shows what disks are in the system and where they are mounted
+df -h shows where the disks are located and how much space they have 
+(vda defines the disk while the number following it describes what partition of the disk it is talking about)
+sudo xxd -l <bytes you want to read> -g 1 <specify what disk to read> this command allows you to read disks and view the information in them
+(the MBR always starts with eb 63 90 with its HEX (specifies that the MBR eb=jump to memory position 63 in the current hex then executes, the 90 represents a command to ignore everything until the given jump ) the last 66 bytes (-2 for magic number (should be 55 aa)) are the partition's data
+sudo parted -l can check where the bios is and check for bios or uefi which will show partition table msdos for bios and gpt for uefi
+*THE MBR IS ALWAYS THE FIRST 512 BYTES OF YOUR VDA OR SDA DISK*
+sudo dd if=/dev/sda(what disk to copy) of=MBRcopy(what to call it) bs=1(block size) count=512(number of bytes) this command copies a set amount of bytes of a disk to another file
+dd creates an exact copy of the actual disk space copied and is literally the disk as a file (use file to prove it)
+SystemD - uses systemctl to execute commands like systemctl list-dependecies graphical.target to see what processes your current target is running while also getting wants by everything before the first target in the service/process list
+SystemD - systemctl show -p Wants graphical.target will also show all the wants of any given target
+SystemD - systemctl list-unit-files will list all the unit files and their status where transient is temporary where units are the classifications/organization of services/processes being run by SystemD
+SystemD - systemctl cat graphical.target will show the location and wants needs etc of a unit
+
+/etc/profile(for logins, can be used for persistence and making any changes to all users login) is the profile for any given user while /etc/environment contains all the global variables and scripts cat /etc/profiles shows a script with all your options while cat /etc/environment show the paths to all the files it uses
+/etc/profile (etc/profile is global but uses an individuals .profile) and your individual $HOME/.profile(or .bash_profile) file in your home directory are for interactive login shells
+/etc/environment and $HOME/.bashrc are used for interactive non-login shells like starting up a terminal without logging in to a profile in said terminal
+
+*Minas_Tirth is SysV while Terra is SystemD*
+
+
 
