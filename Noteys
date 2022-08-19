@@ -248,7 +248,7 @@ SystemD - systemctl cat graphical.target will show the location and wants needs 
 /etc/environment and $HOME/.bashrc are used for interactive non-login shells like starting up a terminal without logging in to a profile in said terminal
 /etc/profile.d contains all the scripts /etc/profile runs
 
-*Minas_Tirth is SysV while Terra is SystemD*
+*Minas_Tirith is SysV while Terra is SystemD*
 
 
 
