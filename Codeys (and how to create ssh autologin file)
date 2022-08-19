@@ -23,3 +23,6 @@ then enter your alias (sshops in this case) to ssh in
 
 
 awk '{if(NR<=420 || NR>=1337){print $0}}' numbers | sha512sum almost works
+
+
+use dd bs=1 skip=446 count=16 to get the first partition table in the mbr
