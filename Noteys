@@ -267,6 +267,24 @@ can be paired with a | select * to get all the information for every process
 resources are grouped into user and system resources, with use of system resources being most important with priority 0 and everything else having a priority at or above 1
 if a user process breaks nothing happens to the actual system, if a system process dies you get a blue screen and a restart
 
+can use | where -property name -like *<name>* to get specific processes
+
+can view the name and processname to check if the processes match their display names and check names on google to see if they are still legit with non-matching names using virustotal.com
+make sure to only upload hashes if anything in order to keep the binary off the internet
+
+resources that are referenced by binaries can be changed via a dll injection which changes how a binary works without actually changing said binary
+
+get-process -name lsass | select -expandproperty modules | out-file <file> -width 4096 can view the handles any given file is using and print them to an out-file which can also use a format-table instead of out-file
+
+tasklist /m /fi "imagename eq lsass" also give the handles for a process but without the path to said resources
+
+use get-service or sc.exe along with showsid to get sid and status(will show sid regardless of whether its real or not
+
+services are defined by residing within svchost.exe which runs all services
+
+sc has several optios like queryx, type, state
+
+
 
 
 
