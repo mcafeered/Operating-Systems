@@ -301,6 +301,7 @@ autoruns64.exe a yellow file entry means file not found but running on system (v
 procexp64.exe can go to properties then click explore on the path to go straight to the value path 
 tcpview64.exe gives a netstat esc network listing that consistently refreshes to catch more bad bois
 sysinternals command for permissions on files and command for handles (google these 2!!)
+use accesschk to check permissions
 
 UAC is when the gui asks you if your sure you want to do something, ex. when you download something that makes changes to your system and theres a popup for it
 the registry key is HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System which shows the current UAC config where EnableLUA represents whether its enables or not
