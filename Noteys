@@ -282,8 +282,31 @@ use get-service or sc.exe along with showsid to get sid and status(will show sid
 
 services are defined by residing within svchost.exe which runs all services
 
-sc has several optios like queryx, type, state
+sc has several options like queryx, type, state
 
+schtasks is used to view scheduled tasks on whatever system your on can have a /query /tn <taskname or full path(if taskname doesnt work)> /v /fo /list
+can also use task scheduler to view non windows related tasks with the gui which if the task is in the very first open folder it is considered root otherwise specify path(never open microsoft in this class)
+
+get-ciminstance win32_process | select * | select processid, parentprocessid, name, commandline
+keep following parent process Id's to find whats happening, use where { $_.<property> -like malware } to find specific instances
+
+netstat -anob is used to check network connectivity with the b showing the binary and PID of the command causing said connection
+get-nettcpconnections can also get exclusively tcp connections on the system
+
+for sysinternals use process explorer, auto runs, process monitor
+use procmon64.exe -accepteula to run processmonitor then record boot host then restart the system
+autoruns64.exe a yellow file entry means file not found but running on system (very sussy) also can jump to the file or registry value
+procexp64.exe can go to properties then click explore on the path to go straight to the value path 
+tcpview64.exe gives a netstat esc network listing that consistently refreshes to catch more bad bois
+sysinternals command for permissions on files and command for handles (google these 2!!)
+
+UAC is when the gui asks you if your sure you want to do something, ex. when you download something that makes changes to your system and theres a popup for it
+the registry key is HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System which shows the current UAC config where EnableLUA represents whether its enables or not
+Execution levels 
+asInvoker runas permissions of parent process
+requireAdministrator based off user permissions requiring authentication if needbe
+highestAvailable application runs with the highest permissions it can
+UAC only shows depending on auto-elevate being true, whether the file is digitally signed. and whether the directory is trusted 
 
 
 
