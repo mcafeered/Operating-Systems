@@ -1,3 +1,5 @@
+xfreerdp /u:student /v:10.50.26.23 /dynamic-resolution +glyph-cache +clipboard
+
 ======================== POWERSHELL ================================
 
 most wmiobjects are Win32_ (means they only works on windows) which pulls information straight from the kernel about objects as opposed to just running the normal command to receive that information 
