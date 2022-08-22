@@ -250,5 +250,28 @@ SystemD - systemctl cat graphical.target will show the location and wants needs 
 
 *Minas_Tirith is SysV while Terra is SystemD*
 
+===================== WINDOWS PROCESS VALIDITY ======================
+
+can get a lot more information for processes using get-process on powershell
+processes require interaction while services run in the background with little to no interaction other than start stop pause
+
+dll's are in their most basic form pointers to resources required for other processes/services to run
+dll's allow programs to call their resources regardless of the OS or system allowing a lot of flexibility with the use of their processes
+
+taskmgr can also be used to view processes
+
+get-ciminstance or get-wmiobject Win32_process are another way to get processes showing hidden processes aswell
+a handle is a resource being utilized by a process that is not a part of its initial binary
+can be paired with a | select * to get all the information for every process
+
+resources are grouped into user and system resources, with use of system resources being most important with priority 0 and everything else having a priority at or above 1
+if a user process breaks nothing happens to the actual system, if a system process dies you get a blue screen and a restart
+
+
+
+
+
+
+
 
 
