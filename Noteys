@@ -353,6 +353,7 @@ kill uses -15(graceful shutdown) -9(forcefully shutdown with no shutdown tasks) 
 mdadam. popularity contest, and anacron are real jobs
 
 cron is used to schedule tasks, it's daemon checks /var/spool/cron, /etc/cron.d, and /etc/crontab to check for jobs and execution times (just different ways to organize the jobs)
+use cat /var/spool/cron/crontabs/<user> to view user related jobs
 user jobs can be made using crontab (-e to edit -l to list -u to specify another user (gonna need sudo)) command and are stored in /var/spool/cron/crontabs/ and are organized by the user who made them and executed with said users permissions
 system cron jobs run as root and perform system wide maintenance which are controlled by /etc/crontab
 CRON SYNTAX
