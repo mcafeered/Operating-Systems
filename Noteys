@@ -371,3 +371,5 @@ also contains sockets which are ips and ports and are separate files
 the letters next to the numbers represent [r]ead [w]rite and u means both read and write (only view these files, no others)
 
 use systemctl list-units --all to list all the units loaded wether active or inactive (can use --type service to just view services)
+systemd has timers that can be set on services which can be viewed by finding the unit file for timers ex. --type timer
+systemctl cat <unit file> can be used to read a unit file
