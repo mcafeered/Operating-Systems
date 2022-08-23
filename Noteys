@@ -366,5 +366,8 @@ CRON SYNTAX
 
 /proc is where the PID's of processes are stored and where ps and top gets their information to display
 
-lsof (-p specifies a PID) lists all the open files for processes on the system (can sudo for every process on the system) only worried about number file descriptors with this command which are associated with streams(0 STDOUT 1 STDIN 2 STDERR)
-also contains sockets which are ips and ports 
+lsof (-p specifies a PID or -c specifies the name of a process) lists all the open files for processes on the system (can sudo for every process on the system) only worried about number file descriptors with this command which are associated with streams(0 STDOUT 1 STDIN 2 STDERR)
+also contains sockets which are ips and ports and are separate files 
+the letters next to the numbers represent [r]ead [w]rite and u means both read and write (only view these files, no others)
+
+use systemctl list-units --all to list all the units loaded wether active or inactive (can use --type service to just view services)
