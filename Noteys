@@ -364,5 +364,7 @@ CRON SYNTAX
 | +---------- Hour              (range: 0-23)
 +------------ Minute            (range: 0-59)
 
+/proc is where the PID's of processes are stored and where ps and top gets their information to display
 
-
+lsof (-p specifies a PID) lists all the open files for processes on the system (can sudo for every process on the system) only worried about number file descriptors with this command which are associated with streams(0 STDOUT 1 STDIN 2 STDERR)
+also contains sockets which are ips and ports 
