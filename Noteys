@@ -311,11 +311,58 @@ requireAdministrator based off user permissions requiring authentication if need
 highestAvailable application runs with the highest permissions it can
 UAC only shows depending on auto-elevate being true, whether the file is digitally signed. and whether the directory is trusted 
 
+===================== LINUX PROCESS VALIDITY ====================
 
+ps -elf gives a snapshot of processes running (the e in elf means everything (no filtering with e) 
+ps -Nlf -ppid 2 (N means not whatever is specified after -Nlf)
+ps -Nlf -ppid 2 --forest (the forest command shows all the parent processes and what their children are using tabs to format)
+ps -Nlf --ppid 2 --forest | grep -A(or B)<number> ps (-A or -B show <number> values after or before whatever is being searched for) --context=<number> gives <number> lines above and below the searched value 
+ps --ppid 1 -lf is used to view orphaned processes on the system
 
+top gives a constantly updating list of processes that can be navigated with up and down arrows while also providing extra information like memory, task number, etc
+the load average is used where 1.0 is a fully used cpu core while anything less than that means there is idling and over that means the cpu is overloaded
+pressing the f key allows adding more fields (use space to select) lik ppid or uid using esc to go back, a heirarchial view can be achieved using Shift+v
 
+htop is another process viewing command, use F5 to view in tree mode for parent processes while adding fields is with F2 (look to bottom of screen for which F<number> is used)
 
+PID 1 is the user space process spawned by init or systemd with PPID 1
+PID 2 is kthreadd which is kernel space processes that are forked through kthreadd to do what they need to with a PPID of 2 
 
+kernel processes run in its own memory which means none of them can go down
+user processes are alloted their own memory to die and not change anything on the system
+
+euid defines the acces rights for a process (the permissions of the user used to start the process), the ruid defines who actually started the process (ex. using sudo will still show the actual original user as the ruid)  
+users can only modify / interact with files and/or processes that they own or have been shared with them
+users can be actual human user accounts as well as some system user accounts
+
+fork() and exec() are system calls used to execute commands (ex. ls needs a fork of the shell with then has the ls command exec()'s on the forked copy of the shell)
+fork() creates an identical copy of a process while exec() just executes commands
+when there is a capital letter CRON as a child of cron that means its a forked process and it is currently executing
+
+orphan processes are processes that continue running after their parent process exits which are eventually picked up by init or systemd
+all daemons are orphans (equivalent to microsoft services), but not all orphans are daemons (use disown -a && exit to close a shell/terminal and force adoption)
+
+zombie processes finish their mission but continue to take up space in the process table and cant be killed until their parent is killed due to their finished state
+
+Daemons are background processes like syslogd sshd cron
+cron is an example of a daemon started at boot
+jobs displays a list of jobs running in the background
+
+kill uses -15(graceful shutdown) -9(forcefully shutdown with no shutdown tasks) -19(pause task to resume later) -1(SIGHUP restarts a process)
+
+mdadam. popularity contest, and anacron are real jobs
+
+cron is used to schedule tasks, it's daemon checks /var/spool/cron, /etc/cron.d, and /etc/crontab to check for jobs and execution times (just different ways to organize the jobs)
+user jobs can be made using crontab (-e to edit -l to list -u to specify another user (gonna need sudo)) command and are stored in /var/spool/cron/crontabs/ and are organized by the user who made them and executed with said users permissions
+system cron jobs run as root and perform system wide maintenance which are controlled by /etc/crontab
+CRON SYNTAX
+* * * * * /directory/and/command
+| | | | |
+| | | | +---- Day of the Week   (range: 0-7, 1 = Monday, (0 or 7) = Sunday)
+| | | +------ Month of the Year (range: 1-12)
+| | +-------- Day of the Month  (range: 1-31)
+| +---------- Hour              (range: 0-23)
++------------ Minute            (range: 0-59)
 
 
 
