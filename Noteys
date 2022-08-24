@@ -388,7 +388,7 @@ seeing a C:\ means someone created something since the kernel only works with tr
 
 Recycle Bin - gci 'C:\$RECYCLE.BIN' -Recurse -Verbose -Force | select * or gci 'C:\$RECYCLE.BIN' -Recurse -Force which are both used to view anyone's recycle bin 
 there are $I (contains the location of the file) files and $R (contains content of a file) files followed by 6 random characters that match files together
-gci 'C:\Recycle.bin' -force -recurse | foreach-object { if (($_.extension) -like ".txt") { if ($_.name -like "`$R*") { Write-host $_.name -nonewline ; write-host "--> " -foregroundcolor green -nonewline ; get-content $_.fullname } } }
+gci 'C:\$Recycle.bin' -force -recurse | foreach-object { if (($_.extension) -like ".txt") { if ($_.name -like "`$R*") { Write-host $_.name -nonewline ; write-host "--> " -foregroundcolor green -nonewline ; get-content $_.fullname } } }
 
 Prefetch - gci -Path 'C:\Windows\Prefetch' -ErrorAction Continue | select * | select -first 5 which shows files created when a file is ran somewhere for the first time deboted by a .db
 
