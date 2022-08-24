@@ -374,3 +374,30 @@ the letters next to the numbers represent [r]ead [w]rite and u means both read a
 use systemctl list-units --all to list all the units loaded wether active or inactive (can use --type service to just view services)
 systemd has timers that can be set on services which can be viewed by finding the unit file for timers ex. --type timer
 systemctl cat <unit file> can be used to read a unit file
+
+============================ WINDOWS ARTIFACTS, AUDITING AND LOGGING ==============================
+
+An artifact is basically anything left behind on the OS from code execution which can be used for foresical analysis
+
+UserAssist - get-itemproperty 'REGISTRY::HKEY_USERS\*\SOFTWARE\MICORSOFT\WINDOWS\CurrentVersion\Explorer\UserAssist\{CEBFF5CD-ACE2-4F4F-9178-9926F41749EA} or {F4E57C4B-2036-45F0-A9AB-443BCFE33D9F}\Count' these commands view either the .exe files run or shortcut files run respectively
+after inputing the above command several subkeys will be viewable which are encoded but can be decoded in cyberchef with ROT13 amount 13
+
+Windows Background Activity Moderator (BAM) - Get-Itemproperty 'HKLM:\SYSTEM\CurrentControlSet\Services\bam\UserSettings\*' (Windows 1709 & 1803) and Get-Itemproperty 'HKLM:\SYSTEM\CurrentControlSet\Services\bam\state\UserSettings\*' (Windows 1809 and newer)
+these are the keys which holds the executable info and last run date with the user who executed it for the service that controls the activity of background applications 
+seeing a C:\ means someone created something since the kernel only works with true full paths (ex. C:\ = \device\harddiskvolume1)
+
+Recycle Bin - gci 'C:\$RECYCLE.BIN' -Recurse -Verbose -Force | select * or gci 'C:\$RECYCLE.BIN' -Recurse -Force which are both used to view anyone's recycle bin 
+there are $I (contains the location of the file) files and $R (contains content of a file) files followed by 6 random characters that match files together
+gci 'C:\Recycle.bin' -force -recurse | foreach-object { if (($_.extension) -like ".txt") { if ($_.name -like "`$R*") { Write-host $_.name -nonewline ; write-host "--> " -foregroundcolor green -nonewline ; get-content $_.fullname } } }
+
+Prefetch - gci -Path 'C:\Windows\Prefetch' -ErrorAction Continue | select * | select -first 5
+
+Jump Lists - gci -Recurse C:\Users\*\AppData\Roaming\Microsoft\Windows\Recent -ErrorAction Continue | select FullName, LastAccessTime
+
+Recent Files - gci 'REGISTRY::HKEY_USERS\*\Software\Microsoft\Windows\CurrentVersion\Explorer\RecentDocs' which lists all files
+
+Browser Artifacts -
+
+get-wmiobject win32_useraccount | select name,sid or get-localUser | select name,sid or wmic useraccount get name,sid are used to get usernames and sids
+
+
