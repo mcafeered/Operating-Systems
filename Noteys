@@ -390,13 +390,15 @@ Recycle Bin - gci 'C:\$RECYCLE.BIN' -Recurse -Verbose -Force | select * or gci '
 there are $I (contains the location of the file) files and $R (contains content of a file) files followed by 6 random characters that match files together
 gci 'C:\Recycle.bin' -force -recurse | foreach-object { if (($_.extension) -like ".txt") { if ($_.name -like "`$R*") { Write-host $_.name -nonewline ; write-host "--> " -foregroundcolor green -nonewline ; get-content $_.fullname } } }
 
-Prefetch - gci -Path 'C:\Windows\Prefetch' -ErrorAction Continue | select * | select -first 5
+Prefetch - gci -Path 'C:\Windows\Prefetch' -ErrorAction Continue | select * | select -first 5 which shows files created when a file is ran somewhere for the first time deboted by a .db
 
-Jump Lists - gci -Recurse C:\Users\*\AppData\Roaming\Microsoft\Windows\Recent -ErrorAction Continue | select FullName, LastAccessTime
+Jump Lists - gci -Recurse C:\Users\*\AppData\Roaming\Microsoft\Windows\Recent -ErrorAction Continue | select FullName, LastAccessTime | ft -wrap which is basically the data for the taskbar of any given user
 
-Recent Files - gci 'REGISTRY::HKEY_USERS\*\Software\Microsoft\Windows\CurrentVersion\Explorer\RecentDocs' which lists all files
+Recent Files - gci 'REGISTRY::HKEY_USERS\*\Software\Microsoft\Windows\CurrentVersion\Explorer\RecentDocs\(name of a given command)' which lists all files
 
-Browser Artifacts -
+Browser Artifacts - .\strings.exe 'C:\Users\<username>\AppData\Local\Google\Chrome\User Data\Default\History' user account details regarding websites
+$History = (Get-Content 'C:\users\<username>\AppData\Local\Google\Chrome\User Data\Default\History') -replace "[^a-zA-Z0-9\.\:\/]",""
+$History| Select-String -Pattern "(https|http):\/\/[a-zA-Z_0-9]+\.\w+[\.]?\w+" -AllMatches|foreach {$_.Matches.Groups[0].Value}| ft
 
 get-wmiobject win32_useraccount | select name,sid or get-localUser | select name,sid or wmic useraccount get name,sid are used to get usernames and sids
 
