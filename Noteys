@@ -402,4 +402,18 @@ $History| Select-String -Pattern "(https|http):\/\/[a-zA-Z_0-9]+\.\w+[\.]?\w+" -
 
 get-wmiobject win32_useraccount | select name,sid or get-localUser | select name,sid or wmic useraccount get name,sid are used to get usernames and sids
 
+to get audits do auditpol /get/category:* for everything
+
+Windows Event Log
+Application - Contains events logged by applications.
+Security - Contains events such as valid/ invalid logon attempts and other events related to resource use like creating, opening, or deleting files.
+System - Contains events logged by system components, such as driver failures other system component to load during startup.
+CustomLog - Contains events logged by applications that create a custom log.
+Using a custom log enables an application to control the size of the log or attach ACLs for security purposes without affecting other applications.
+
+the GUI windows event viewer can be used to view logs which displays each row as each log 
+get-eventlog -logname security -message "*remote*" | ft -wrap
+get-winevent
+
+
 
