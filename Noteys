@@ -514,6 +514,6 @@ journalctl -u ssh.service can be used to view the service logs
 
 use jq . <filename> for json files
 use xpath command ex. xpath -e '//@addr' <file>
-
+can use jq .<field to look at>(optionally add < > = to compare) <filename>
 
 
