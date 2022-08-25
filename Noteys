@@ -488,12 +488,32 @@ SEVERITY CODES
 7  Debug:         Debug-level messages
 
 can view rsyslog by doing tail-n<number> /etc/rsyslog.conf
-rsyslog is separated by fields representing facility then severity(defines how severe it must be to log) seperated by a period where .no means ignore, and a semicolon means more rules are on that one line with a backslash for newline and = meaning only that thing and ! meaning not that and something below it
+rsyslog is separated by fields representing facility then severity(defines how severe it must be to log) seperated by a period where .no means ignore, and a semicolon means more rules are on that one line with a backslash for newline and = meaning only that thing and ! meaning not that and something below it and a comma specifying more facilities
 @@(tcp) or @(udp)<socket> is used for remote logging of facilities
 
+-Best Practices-
+Meaningful Naming Schema
+Separate logs logically and by precedence
+Sync time across network
+Control log access
+-Utilize cron jobs / scripts-
+logrotate keeps x amount of logs and does whatever is specified with them after
+/etc/logrotate.conf 
+How large to let files get. How long to keep them.
 
+USEFUL LOGGING COMMANDS
+tail -f - Continuously show end of file
+less /var/log/syslog - View Log in page viewer
+logger - Send a user generated message to system Log i.e. Starting Update
+> /var/log/messages - Wipes Logs
+Why do this as opposed to deleting/recreating files?
+last -f /var/log{wtmp,btmp} - Needed to view data files
 
+journalctl is used for systemd logs like getting the boots with journalctl --list-boots which lists boot ids that can be further looked into for actual logs
+journalctl -u ssh.service can be used to view the service logs
 
+use jq . <filename> for json files
+use xpath command ex. xpath -e '//@addr' <file>
 
 
 
