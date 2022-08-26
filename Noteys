@@ -592,6 +592,12 @@ use notepad++ to view the file and search it using regex or keywords
 connections give the connections made currently in the file
 connscan shows current and closed tcp connection made over the device
 get suspected viruses filehashes and then put them in virustotal to check if they are malicious or not
+psscan to get physical memory address of processes
+dlllist will show all the dlls used
+dlldump grabs dlls and puts them in a file
+hivedump dumps an entire registry hive
+hivelist lists all hives
+dumpregistry just dumps the whole gosh darn registry
 
 use net use * \\live.sysinternals.com\tools to mount sysinternals and use said tools
 
