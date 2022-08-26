@@ -585,5 +585,13 @@ use .\volatility_2.6_win64_standalone.exe -h to get the help file for volatility
 -f FILENAME
 imageinfo can get the profile needed to run on the file
 pstree shows processes in a tree format
+procdump -p <PID> dumps a process to an executable file, then use -D to specify where to put it 
+memdump -p <PID> get a memory dump of what the process did, use the same -D 
+use the sysinternals strings.exe to get all the actual human-readable information and put that in a file for dissection
+use notepad++ to view the file and search it using regex or keywords
+connections give the connections made currently in the file
+connscan shows current and closed tcp connection made over the device
+get suspected viruses filehashes and then put them in virustotal to check if they are malicious or not
 
+use net use * \\live.sysinternals.com\tools to mount sysinternals and use said tools
 
