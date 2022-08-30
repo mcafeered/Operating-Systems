@@ -1,4 +1,4 @@
-xfreerdp /u:student /v:10.50.26.23 /dynamic-resolution +glyph-cache +clipboard
+xfreerdp /u:andy.dwyer /v:10.50.26.23 /dynamic-resolution +glyph-cache +clipboard
 
 ======================== POWERSHELL ================================
 
