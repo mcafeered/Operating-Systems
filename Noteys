@@ -601,3 +601,65 @@ dumpregistry just dumps the whole gosh darn registry
 
 use net use * \\live.sysinternals.com\tools to mount sysinternals and use said tools
 
+========================= ACTIVE DIRECTORY ============================
+
+gwmi win32_service | where { $_.name -like "adws" -or $_.name -like "kdc" -or $_.name -like "netlogon" -or $_.name -like "dns" } | select name,state,status
+this script checks if certain domain controller services are running
+
+get-addomaincontroller
+this command checks if the current computer is a domain controller and if so what its domain is 
+
+get-addomain <domain name>
+this command diplays specific domain information
+
+get-adforest <domain name>
+this gets the forest for a specific domain
+
+get-smbshare
+this shows what information is shared by the domain controller 
+
+active directory uses the module ActiveDirectory (got using get-module ActiveDirectory) along with get-command -module activedirectory to view commands for said module
+
+getadgroup -filter * 
+gets all groups and information about them
+
+get-adgroupmember -identity <domain group name> (adding a -recursive shows all members within a said group)
+can be used to view the data for a specific group
+
+GROUP POLICY OBJECT QUERIES
+gpresult
+Get-GPResultantSetOfPolicy
+
+HUNTING IN AD
+Who
+What
+Where
+When
+Why
+
+SUSPICIOUS ACTIVITY
+Unknown admin accounts
+Active outside normal work hours
+Nested groups
+Service accounts logging into hosts
+User accounts logging into critical infrastructure (i.e. Domain Controller)
+
+USER ENUMERATION FOR HUNTING PURPOSES
+  Methods
+CMD
+PowerShell
+Logs
+3rd party software
+
+POWERSHELL AD COMMANDS
+(VERB)-AD(NOUN)
+
+Examples
+Get-ADUser -filter * -property *
+New-ADUser -Name "Bad Guy" -PasswordNotRequired 1(1 means dont need one, 0 means need one) -Path "OU=3RD LPT,OU=CCO,OU=3RDBN,OU=WARRIORS,DC=ARMY,DC=WARRIORS"
+
+
+search-adaccount -accountdisabled shows disabled accounts (-accountexpired)
+
+
+
