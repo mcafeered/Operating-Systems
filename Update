@@ -1,0 +1,689 @@
+xfreerdp /u:andy.dwyer /v:10.50.26.23 /dynamic-resolution +glyph-cache +clipboard
+
+======================== POWERSHELL ================================
+
+most wmiobjects are Win32_ (means they only works on windows) which pulls information straight from the kernel about objects as opposed to just running the normal command to receive that information 
+
+should not see pipes when viewing the processes
+
+there are differences between user profiles in Powershell, Powershell ISE, and the newest version of powershell
+start powershell -noprofile will load powershell without a profile
+look for a powershell command ran with -windowstyle Hidden which means something is being hidden from you
+can also change the version of the powershell you are about to run with -version <version number>
+
+get-item WSMAN:\localhost\client\trustedhosts ping trusted hosts that can be Winrm'd into, can also use set item instead of give to set a trusted host make sure to add -concatenate to add as opposed to overwrite
+
+invoke-command -comptername pwnd_host { restart-computer } -asjob 
+invoke-command -computername a workstation,server C:\windows\findevil.ps1 
+invoke-command is used to run commands remotely on other workstations with a small session while new-pssession which creates a more permanent session with the remote device
+
+========================== WINDOWS REGISTRY ==============================
+
+the registry is a heirarchial database that stores system wide settings as well as profile settings
+
+hive keys always start with HKEY and are the main big groups of data like HKEY_Current_User or HKEY_Local_Machine
+Registry keys are basically directories or subdirectories (subkeys) 
+Registry values are the actual entries that contain data which can be read
+
+HKEY_CLASSES_ROOT is a symbolic link to the classes subkey in in HKEY_Local_Machine which contains all the file extensions and what file pertains to them
+ren can rename file extensions to change their extension to whatever you want ex calc.exe to calc.lol
+classes have to have a default key with an actual value which defaults to string upon creation unless specified otherwise
+the default key in classes describes what the files with said extension should be treated like ex an exefile which is executable which also needs a specific designation since there are many different executable types in windows
+
+HKEY_Local_Machine is just the local machine settings
+
+HKEY_CurrentUser is a symbolic link to the HKEY_Users key containing the settings for the currently logged in user
+
+HKEY_Users has the normal settings for every user sorted by their sid and a classes key which specifies how you choose to open your extensions
+
+only Admins can open and change any other HKEY then the one for their user account
+
+HKEY_LOCAL_MACHINE KEYS
+even administrators cant view the SAM key which holds security tokens and usernames for every user account
+BCD00000000 deals with the boot configuration of the system
+Hardware has drivers and other such hardware related data
+Security contains the lsass configuration data
+System has the boot or driver startup applications
+Software has the system wide user downloaded applications 
+
+the S-1-5-18 account is local system
+the S-1-5-19 account is local service
+the S-1-5-20 account is networking account
+
+the 21 in a user account represents the domain while the numbers after represent the machine they are on and what order they were created in
+
+Files are needed to store registry values to load them on every boot
+user setting are stored in the NTUSER.DAT file for every user which is the user's registry settings
+system settings are stored in the system32/config file which stores the registry settings where RegBack is the registry backup file
+
+for the GUI regedit is used to manipulate the registry and add/delete keys or change data
+data we use primarily is string, binary, and DWORD which can provide either a decimal or hexadecimal 32 bit value (QWORD for 64 bit)
+
+subkeys can also be saved to export/import entire subkeys to other systems
+
+to use the cmd to edit registry values use reg along with a command like ADD or DELETE 
+reg query does not take astericks (and wildcards in general) which means you would have to take each individual sid using reg query
+
+powershell uses get-item to just get KEYS and what their name is/data associated with them
+get-childitem gives the subkeys for a key using -recurse to get all the subkeys as well as registry values and data ex get-childitem HKLM:\
+set-itemproperty -path HKLM:\software\microsoft\windows\currentversion\run\etc.(any key/path) -name <name of registry value> -value <data to put in value>
+new-itemproperty works the same as set-itemproperty but creates a new value
+
+use get-psdrive gets the currently mounted filesystems then use new-PSdrive -name HKU -PSProvider registry -root HKEY_Users to mount the HKU as a PSDRIVE to view in powershell 
+use add-content "<previous command>" $profile.allusersallhosts to add it to the users profiles then run &$profile.allusersallhosts to reload the file without restarting powershell
+can alternatively just use registry::HKEY_Users instead of creating a new key to specify that its a registry path not a filesystem in PSDRIVE
+on powershell can use wildcards like asterick* to query multiple values like all users ex get-item HKU:\*\<path>
+
+HKLM\SOFTWARE\microsoft\windows\currentversion\profilelist contains a list of all users that have logged in
+HKLM\SOFTWARE\microsoft\windows\currentversion\Image File Execution File Options tells a file what to do every single time it is executed
+files can be created in Image File Execution to run other commands using the dataname Debugger then given it a executable path as data, though doing this requires real time monitoring to be disabled since this is a well known exploit
+after performing this exploit you can go to the lock screen and click the ease of access button to open a command prompt as the system authority
+
+use set-mppreference -DisableRealTimeMonitoring $True to disable windows defenders ability to prevent the previously described exploit
+
+========================================== WINDOWS ADS (Alternate Data Stream) ===================================
+
+windows uses NTFS (new technology file system) as its default which allows a lot more partitions (26 primary) and over a terrabyte of storage 
+Windows used to use FAT (file allocation table) with only 4 partitions per hard drive followed by exFAT which still only held 16
+NTFS added ADS to windows which allows data to be stealthily added to other data 
+ADS can be used to create an invisible file that slowly fills up your hard drive without showing it on the GUI which eventually crashes the kernel
+ADS works for antivirus and sequel servers
+ADS must be viewed through the CLI since they dont show up in the GUI 
+Create an ADS using for example echo "Elden Ring does deserve GOTY" > something.exe:truth.txt
+
+to see ADS with powershell you have to get-item .\something.exe -stream * to check individual files followed by get-content .\calc.fuk -stream truth.txt to read it
+you need a whole dang script to read through files in a directory to find ADS ex. 
+get-childitem <path> | foreach-object { get-item $_.fullName -stream * } | where { $_.stream -ne $DATA } | get-content (to read it if ya need it) 
+
+========================================== LINUX ==========================================
+
+BASIC QUESTIONS TO ASK IMMEDIATELY
+hostname and uname -a are used to find out where u are 
+find out who you are using whoami and id command (gives user/group sid and username)
+use sudo -l to see what you can and cant do on your machine
+run w, who, ps -elf to find out who is on the system and whats going on
+mark down anything interesting and figure out why its happening, how its happening, and what it is 
+assuming this leads you to something human-readable, find out what's in there
+
+FILESYSTEM HEIRARCHY
+
+everything starts at Root /
+/bin is for standard binary commands that dont require system access to run (can be /usr/bin, or /usr/local/bin depending on the machine)
+/sbin is for system binaries that require system permissions to use (can be /usr/sbin depending on the machine)
+/home is the default directory for any given user's home
+/usr universal system resources, the catch all for all system files designed for us on the entire system on a given box
+/etc everthing thats configurable, catch all for system level configuration files like shadow or passwd
+/var files that are likely to change ex. logs
+/boot all the files that are read during boot 
+/dev all special device related files that reference specific devices like keyboards or mouses
+/lib functions that are needed for given applications to run
+/mnt used for permanently attatched external storage
+/media removable media like usb's
+/opt reserved for any files the user downloads themselves
+/run runtime and variable data which holds information on the current session being run (mounted during boot) 
+/tmp temporary files (everyone has access)
+/proc processes (this is where ps -elf gets it's information to display)
+
+USERS AND GROUPS (and permissions)
+
+all users are held in /etc/passwd with their uid and guid
+groups can be checked on the file /etc/groups in the format groupname:passwd placeholder:GID:who uses it as a supplementary group
+ls -lisa shows the owner of and permissions for files (permissions formatted in UGO (user group other) with read write execute permissions) with the field after the permissions being the user and the group
+
+SUID is a bit that will be in the user permission part of the permissions section signified with an s which allows anyone to execute as root (in passwd still only lets you change your data)
+SGID lets you run with the permissions of the group specified (same as suid but groups)
+STICKY BIT any file thats created with access via a group can only be deleted by the creator of said file
+
+SCRIPTING
+man --help provides options
+man -k (keyword search) to find specific commands
+apropos is also a keyword search
+whereis locates commands through source and binary files (use -b for binary)
+
+SHELLS 
+echo $0 prints your shell if its cosix compliant
+sh has no history file when writing commands
+use cat /etc/shells to view all usable shells on the machine
+
+FOR LATER
+ifconfig is deprecated, now ip addr / ip a is used for interfaces and their ip addresses, mac addresses, statuses, etc.
+netstat -ntlp shows ports and their status on the machine, you could also use ss -ntlp (could remove the n to get actual names of service ports) (l makes it only print listening ports)
+can sudo for ports to see what processes are being used for said ports 
+ip route, ip r, route shows what routes and interfaces are used to connect to particular networks
+arp, ip neigh, ip n shows what the machine has comminicated with recently and whether it is still reachable or not
+check firewalls using iptables -l to view the rules
+
+================================= Windows Boot Process ================================
+
+POST is what happens right after a windows device is turned on to check for hardware and confirm its existence
+
+BIOS(older) which uses the MBR or UEFI(newer) which uses the GPT is the next step
+
+BIOS loads the entire OS while UEFI (uses bootmgrfw.efi) is faster and has a secure boot which makes sure the current OS is the same as the initial OS on the system and makes sure no malware was downloaded since the last shutdown
+UEFI is loaded into flash memory making it easier for updating and patching with 9 zettabytes of drive support
+UEFI uses GPT (guid partition table) which checks for GPT in the current drive, if not found it asks the bootmgrfw.efi where GPT is in a UFI partition that goes straight to the boot manager that loads winload.efi or winresume.efi which loads the kernel on NtOSKRNL
+
+BIOS looks for the MBR(first 512 bytes in the hard drive) which contains the code to start Bootmgr which manages the boot process and loads the boot configuration data store which keeps track of how the OS will load and what OS is installed on the machine
+winload.exe(cold starts) which uses the BCD data which is bootconfiguration data or winresume.exe(sleeping/locking machine (warmstart)) load the Kernel (winresume.exe points to where the current data of machine state is stored in C:\ drive which saves how the computer was prior to locking it or not completly shutting it down)
+Restarts turn off the entire OS and use winload as opposed to a fast start which uses winresume which means extra data has to be saved and loaded saving the machines previous state
+
+after either UEFI or BIOS loads the kernel loads several files like paging the pagefile which stores less important information to be loaded at startup outside of RAM along with several other files owned by the kernel
+the process manager is started by the kernel which starts the system idle process which displays the available resources left for CPU,Memory,Disk,etc. for your machine as a kernel process
+
+NTOSKRNL starts a process called System which then loads smss.exe which loads sessions for login of up to multiple users
+smss.exe makes a copy of itself for each user session starting with session 0 which is system and separate from other actual user sessions, this first session has SMSS run CSRSS.exe and WININIT.exe
+WININIT runs LSASS.exe(user authentication (compare credentials with SAM)) and services.exe which launches SVCHOST.exe(the service that hosts services) which are used for initialization of windows
+for actual user sessions(1 and up) SMSS runs CSRSS.exe and WINLOGON.exe
+WINLOGON (which sends given credentials to a sub-process of LSASS proted to the given session) runs LOGONUI.exe(actual user interface) and USERINIT.exe(runs explorer upon authentication) which loads the Explorer.exe (kills userinit once its done) which is the GUI for the user and officially ends the boot process
+0-1000 PIDS are process IDS reserved for system, meaning all session 0 processes are below 1000 and 3 user related sessions are created with system privileges in order to run correctly which are SMSS, CSSRS, and WINLOGON which are almost immediately closed once they are done executing
+CSSRS allows windows to request services from other machines like servers to use for example DNS 
+
+SAS is what forces you to press CTRL+ALT+DELETE to start authenticating
+
+Type C:\Windows\Panther\setupact.log | findstr /i "Detected boot environment" can find whether the system booted with Bios or Uefi(using powershell)
+or
+bcdedit | findstr /i winload (or winresume) can find UEFI or BIOS mode and whether it was a warm or cold start
+or 
+msinfo32 which spawns a GUI that shows the BIOS mode (legacy is bios while UEFI is uefi)
+
+\Device\HarddiskVolume1 is the true path of C:\ which can change
+
+bcdedit allows the viewing and manipulation of BCD data
+
+bcdedit prints the boot manager and some other basic information, the identifier being the most important field identifying what information is being displayed
+device defines where in the system the identifier is being used
+path shows what process was used 
+
+bcdedit /set can change data values
+
+bcdedit /set safeboot minimal makes the system boot in safemode at the most minimal level ex. just a command prompt and the bare minimum amount of data and services
+
+bcdedit /set safeboot Network still gives a basic shell (cli powershell) but also loads network resources allowing for online use
+
+bcdedit /set safebootalternateshell allows other shells besides cli or powershell like bash
+bcdedit /deletevalue safeboot and /deletevalue safebootalternateshell will make the GUI run normally again
+alternatively msconfig (can be typed in cli) can be brought up as a GUI then the boot settings can be changed to uncheck safeboot for the current OS
+msconfig also lets you view services (both microsoft and not) and enable or disable them
+
+hiberfile.sys is for hibernation file saving
+
+=================================== LINUX Boot Process ========================================
+
+Linux brings back BIOS and UEFI which again both use the MBR and GPT
+- the boot loader is started by either BIOS or UEFI to find grub and start it
+
+This time grub or grub.efi is started by the MBR or GPT to start the Linux kernel 
+- grub finds the kernel image and starts it (config file is /boot/grub/menu.lst (old) actually look for /boot/grub/grub.cfg which contains the code for the GUI) and can be configured during boot via a GUI that appears, it can alter boot entreis, selecting different kernels, and modify initial ram disk
+
+The kernel starts init which forks off either to SysV or SystemD (the kernel maintains the interaction between the user and the os)
+- The Kernel initializes devices/drivers, mounts the filesystem, starts the program /sbin/init, and then init starts the rest of the system based off its runlevel
+- The kernel has modules in order to run hardware devices which can be viewed using the lsmod command (the kernel itself is process 0 while it starts a daemon [kthreadd] with a pid of 2)
+
+ls -l /sbin/init will show whether the system id systemD or SysV by whether there is a link to SystemD or not
+
+Init is the service and process manager of all services/processes on the system
+SysV - uses runlevels and can only start stop and pause said processes/services and runs everything in order handled by scripts being viewable via ls /etc/rc(0-6).d which specifies what scripts are run for each runlevel with /etc/init.d containing the actual scripts while the rc's contain links
+SysV - default runlevel is 5 for multi-user network and GUI, runlevel 0 is halt, runlevel 1 is single-user, runlevel 2-5 are multi-user, and runlevel 6 is reboot which can be viewed using cat /etc/inittab
+SysV - 2 = multiuser no networking, 3 = full multiuser with networking, 4 = full multiuser with networking and custom config, 5 full multiuser with with netowrking and GUI
+SystemD - loads system in parallel from binaries to load the processes/services much faster than init with targets similar to runlevels in init
+SystemD - SystemD can do a lot more than init like boot, login, move home directory, etc. ls -lisa /lib/systemd/system/default.target prints the default target which should be graphical.target for the gui
+SystemD - uses targets like graphical.target as runlevels which can be viewed by using cat /lib/systemd/system/default.target to see what options it takes under the [Unit] header (requires = what target it needs while wants = what services can be ignored, conflicts = what services cant be running during initialization) 
+SystemD - can have multiple folders for system processes like /etc/systemd/system, /lib/systemd/system, and /usr/lib/systemd/system which can all be ls -lisa'd
+
+COMMANDS
+lsblk shows what disks are in the system and where they are mounted
+df -h shows where the disks are located and how much space they have 
+(vda defines the disk while the number following it describes what partition of the disk it is talking about)
+sudo xxd -l <bytes you want to read> -g 1 <specify what disk to read> this command allows you to read disks and view the information in them
+(the MBR always starts with eb 63 90 with its HEX (specifies that the MBR eb=jump to memory position 63 in the current hex then executes, the 90 represents a command to ignore everything until the given jump ) the last 66 bytes (-2 for magic number (should be 55 aa)) are the partition's data
+sudo parted -l can check where the bios is and check for bios or uefi which will show partition table msdos for bios and gpt for uefi
+*THE MBR IS ALWAYS THE FIRST 512 BYTES OF YOUR VDA OR SDA DISK*
+sudo dd if=/dev/sda(what disk to copy) of=MBRcopy(what to call it) bs=1(block size) count=512(number of bytes) this command copies a set amount of bytes of a disk to another file
+dd creates an exact copy of the actual disk space copied and is literally the disk as a file (use file to prove it)
+SystemD - uses systemctl to execute commands like systemctl list-dependecies graphical.target to see what processes your current target is running while also getting wants by everything before the first target in the service/process list and after displays what the unit wants to run
+SystemD - systemctl show -p Wants graphical.target will also show all the wants of any given target
+SystemD - systemctl list-unit-files will list all the unit files and their status where transient is temporary where units are the classifications/organization of services/processes being run by SystemD
+SystemD - systemctl cat graphical.target will show the location and wants needs etc of a unit
+
+/etc/profile(for logins, can be used for persistence and making any changes to all users login) is the profile for any given user while /etc/environment contains all the global variables and scripts cat /etc/profiles shows a script with all your options while cat /etc/environment show the paths to all the files it uses
+/etc/profile (etc/profile is global but uses an individuals .profile) and your individual $HOME/.profile(or .bash_profile) file in your home directory are for interactive login shells
+/etc/environment and $HOME/.bashrc are used for interactive non-login shells like starting up a terminal without logging in to a profile in said terminal
+/etc/profile.d contains all the scripts /etc/profile runs
+
+*Minas_Tirith is SysV while Terra is SystemD*
+
+===================== WINDOWS PROCESS VALIDITY ======================
+
+can get a lot more information for processes using get-process on powershell
+processes require interaction while services run in the background with little to no interaction other than start stop pause
+
+dll's are in their most basic form pointers to resources required for other processes/services to run
+dll's allow programs to call their resources regardless of the OS or system allowing a lot of flexibility with the use of their processes
+
+taskmgr can also be used to view processes
+
+get-ciminstance or get-wmiobject Win32_process are another way to get processes showing hidden processes aswell
+a handle is a resource being utilized by a process that is not a part of its initial binary
+can be paired with a | select * to get all the information for every process
+
+resources are grouped into user and system resources, with use of system resources being most important with priority 0 and everything else having a priority at or above 1
+if a user process breaks nothing happens to the actual system, if a system process dies you get a blue screen and a restart
+
+can use | where -property name -like *<name>* to get specific processes
+
+can view the name and processname to check if the processes match their display names and check names on google to see if they are still legit with non-matching names using virustotal.com
+make sure to only upload hashes if anything in order to keep the binary off the internet
+
+resources that are referenced by binaries can be changed via a dll injection which changes how a binary works without actually changing said binary
+
+get-process -name lsass | select -expandproperty modules | out-file <file> -width 4096 can view the handles any given file is using and print them to an out-file which can also use a format-table instead of out-file
+
+tasklist /m /fi "imagename eq lsass" also give the handles for a process but without the path to said resources
+
+use get-service or sc.exe along with showsid to get sid and status(will show sid regardless of whether its real or not
+
+services are defined by residing within svchost.exe which runs all services
+
+sc has several options like queryx, type, state
+
+schtasks is used to view scheduled tasks on whatever system your on can have a /query /tn <taskname or full path(if taskname doesnt work)> /v /fo /list
+can also use task scheduler to view non windows related tasks with the gui which if the task is in the very first open folder it is considered root otherwise specify path(never open microsoft in this class)
+
+get-ciminstance win32_process | select * | select processid, parentprocessid, name, commandline
+keep following parent process Id's to find whats happening, use where { $_.<property> -like malware } to find specific instances
+
+netstat -anob is used to check network connectivity with the b showing the binary and PID of the command causing said connection
+get-nettcpconnections can also get exclusively tcp connections on the system
+
+for sysinternals use process explorer, auto runs, process monitor
+use procmon64.exe -accepteula to run processmonitor then record boot host then restart the system
+autoruns64.exe a yellow file entry means file not found but running on system (very sussy) also can jump to the file or registry value
+procexp64.exe can go to properties then click explore on the path to go straight to the value path 
+tcpview64.exe gives a netstat esc network listing that consistently refreshes to catch more bad bois
+sysinternals command for permissions on files and command for handles (google these 2!!)
+use accesschk to check permissions
+
+UAC is when the gui asks you if your sure you want to do something, ex. when you download something that makes changes to your system and theres a popup for it
+the registry key is HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System which shows the current UAC config where EnableLUA represents whether its enables or not
+Execution levels 
+asInvoker runas permissions of parent process
+requireAdministrator based off user permissions requiring authentication if needbe
+highestAvailable application runs with the highest permissions it can
+UAC only shows depending on auto-elevate being true, whether the file is digitally signed. and whether the directory is trusted 
+
+===================== LINUX PROCESS VALIDITY ====================
+
+ps -elf gives a snapshot of processes running (the e in elf means everything (no filtering with e) 
+ps -Nlf -ppid 2 (N means not whatever is specified after -Nlf)
+ps -Nlf -ppid 2 --forest (the forest command shows all the parent processes and what their children are using tabs to format)
+ps -Nlf --ppid 2 --forest | grep -A(or B)<number> ps (-A or -B show <number> values after or before whatever is being searched for) --context=<number> gives <number> lines above and below the searched value 
+ps --ppid 1 -lf is used to view orphaned processes on the system
+
+top gives a constantly updating list of processes that can be navigated with up and down arrows while also providing extra information like memory, task number, etc
+the load average is used where 1.0 is a fully used cpu core while anything less than that means there is idling and over that means the cpu is overloaded
+pressing the f key allows adding more fields (use space to select) lik ppid or uid using esc to go back, a heirarchial view can be achieved using Shift+v
+
+htop is another process viewing command, use F5 to view in tree mode for parent processes while adding fields is with F2 (look to bottom of screen for which F<number> is used)
+
+PID 1 is the user space process spawned by init or systemd with PPID 1
+PID 2 is kthreadd which is kernel space processes that are forked through kthreadd to do what they need to with a PPID of 2 
+
+kernel processes run in its own memory which means none of them can go down
+user processes are alloted their own memory to die and not change anything on the system
+
+euid defines the acces rights for a process (the permissions of the user used to start the process), the ruid defines who actually started the process (ex. using sudo will still show the actual original user as the ruid)  
+users can only modify / interact with files and/or processes that they own or have been shared with them
+users can be actual human user accounts as well as some system user accounts
+
+fork() and exec() are system calls used to execute commands (ex. ls needs a fork of the shell with then has the ls command exec()'s on the forked copy of the shell)
+fork() creates an identical copy of a process while exec() just executes commands
+when there is a capital letter CRON as a child of cron that means its a forked process and it is currently executing
+
+orphan processes are processes that continue running after their parent process exits which are eventually picked up by init or systemd
+all daemons are orphans (equivalent to microsoft services), but not all orphans are daemons (use disown -a && exit to close a shell/terminal and force adoption)
+
+zombie processes finish their mission but continue to take up space in the process table and cant be killed until their parent is killed due to their finished state
+
+Daemons are background processes like syslogd sshd cron
+cron is an example of a daemon started at boot
+jobs displays a list of jobs running in the background
+
+kill uses -15(graceful shutdown) -9(forcefully shutdown with no shutdown tasks) -19(pause task to resume later) -1(SIGHUP restarts a process)
+
+mdadam. popularity contest, and anacron are real jobs
+
+cron is used to schedule tasks, it's daemon checks /var/spool/cron, /etc/cron.d, and /etc/crontab to check for jobs and execution times (just different ways to organize the jobs)
+use cat /var/spool/cron/crontabs/<user> to view user related jobs
+user jobs can be made using crontab (-e to edit -l to list -u to specify another user (gonna need sudo)) command and are stored in /var/spool/cron/crontabs/ and are organized by the user who made them and executed with said users permissions
+system cron jobs run as root and perform system wide maintenance which are controlled by /etc/crontab
+CRON SYNTAX
+* * * * * /directory/and/command
+| | | | |
+| | | | +---- Day of the Week   (range: 0-7, 1 = Monday, (0 or 7) = Sunday)
+| | | +------ Month of the Year (range: 1-12)
+| | +-------- Day of the Month  (range: 1-31)
+| +---------- Hour              (range: 0-23)
++------------ Minute            (range: 0-59)
+
+/proc is where the PID's of processes are stored and where ps and top gets their information to display
+
+lsof (-p specifies a PID or -c specifies the name of a process) lists all the open files for processes on the system (can sudo for every process on the system) only worried about number file descriptors with this command which are associated with streams(0 STDOUT 1 STDIN 2 STDERR)
+also contains sockets which are ips and ports and are separate files 
+the letters next to the numbers represent [r]ead [w]rite and u means both read and write (only view these files, no others)
+
+use systemctl list-units --all to list all the units loaded wether active or inactive (can use --type service to just view services)
+systemd has timers that can be set on services which can be viewed by finding the unit file for timers ex. --type timer
+systemctl cat <unit file> can be used to read a unit file
+
+============================ WINDOWS ARTIFACTS, AUDITING AND LOGGING ==============================
+
+An artifact is basically anything left behind on the OS from code execution which can be used for foresical analysis
+
+UserAssist - get-itemproperty 'REGISTRY::HKEY_USERS\*\SOFTWARE\MICORSOFT\WINDOWS\CurrentVersion\Explorer\UserAssist\{CEBFF5CD-ACE2-4F4F-9178-9926F41749EA} or {F4E57C4B-2036-45F0-A9AB-443BCFE33D9F}\Count' these commands view either the .exe files run or shortcut files run respectively
+after inputing the above command several subkeys will be viewable which are encoded but can be decoded in cyberchef with ROT13 amount 13
+
+Windows Background Activity Moderator (BAM) - Get-Itemproperty 'HKLM:\SYSTEM\CurrentControlSet\Services\bam\UserSettings\*' (Windows 1709 & 1803) and Get-Itemproperty 'HKLM:\SYSTEM\CurrentControlSet\Services\bam\state\UserSettings\*' (Windows 1809 and newer)
+these are the keys which holds the executable info and last run date with the user who executed it for the service that controls the activity of background applications 
+seeing a C:\ means someone created something since the kernel only works with true full paths (ex. C:\ = \device\harddiskvolume1)
+
+Recycle Bin - gci 'C:\$RECYCLE.BIN' -Recurse -Verbose -Force | select * or gci 'C:\$RECYCLE.BIN' -Recurse -Force which are both used to view anyone's recycle bin 
+there are $I (contains the location of the file) files and $R (contains content of a file) files followed by 6 random characters that match files together
+gci 'C:\$Recycle.bin' -force -recurse | foreach-object { if (($_.extension) -like ".txt") { if ($_.name -like "`$R*") { Write-host $_.name -nonewline ; write-host "--> " -foregroundcolor green -nonewline ; get-content $_.fullname } } }
+
+Prefetch - gci -Path 'C:\Windows\Prefetch' -ErrorAction Continue | select * | select -first 5 which shows files created when a file is ran somewhere for the first time denoted by a .db
+
+Jump Lists - gci -Recurse C:\Users\*\AppData\Roaming\Microsoft\Windows\Recent -ErrorAction Continue | select FullName, LastAccessTime | ft -wrap which is basically the data for the taskbar of any given user
+
+Recent Files - gci 'REGISTRY::HKEY_USERS\*\Software\Microsoft\Windows\CurrentVersion\Explorer\RecentDocs\(name of a given command)' which lists all files
+
+Browser Artifacts - .\strings.exe 'C:\Users\<username>\AppData\Local\Google\Chrome\User Data\Default\History' user account details regarding websites
+$History = (Get-Content 'C:\users\<username>\AppData\Local\Google\Chrome\User Data\Default\History') -replace "[^a-zA-Z0-9\.\:\/]",""
+$History| Select-String -Pattern "(https|http):\/\/[a-zA-Z_0-9]+\.\w+[\.]?\w+" -AllMatches|foreach {$_.Matches.Groups[0].Value}| ft
+
+get-wmiobject win32_useraccount | select name,sid or get-localUser | select name,sid or wmic useraccount get name,sid are used to get usernames and sids
+
+to get audits do auditpol /get/category:* for everything
+
+Windows Event Log
+Application - Contains events logged by applications.
+Security - Contains events such as valid/ invalid logon attempts and other events related to resource use like creating, opening, or deleting files.
+System - Contains events logged by system components, such as driver failures other system component to load during startup.
+CustomLog - Contains events logged by applications that create a custom log.
+Using a custom log enables an application to control the size of the log or attach ACLs for security purposes without affecting other applications.
+
+the GUI windows event viewer can be used to view logs which displays each row as each log 
+get-eventlog -logname security -message "*remote*" | ft -wrap
+get-winevent
+
+========================== LINUX AUDITING AND LOGGING ========================
+
+remote logging saves logs even after a system crash or compromise, and logging in general allows historical analysis
+logs do take up a lot of space and have to actually be analyzed even though they can be cryptic and log not enough or too much
+
+Authentication
+
+/var/log/auth.log - Authentication related events
+/var/run/utmp - Users currently logged in
+/var/log/wtmp - History file for utmp
+/var/log/btmp - Failed login attempts
+
+use last -f <authentication log> to check authentication logs since they're binary
+a users ssh session is shown through new session <number> then a disconnect on same PID in the auth.log
+---------------------------------------------------------------------------------------------
+
+Application
+
+apache - Web Server (dir)
+apt - Package Manager (dir)
+/var/log/mysql.log
+
+---------------------------------------------------------------------------------------------
+
+System
+
+/var/log/messages - Legacy Catch all
+/var/log/syslog - Ubuntu/Debian Catch all
+
+dmesg = Device Messenger (queries /proc/kmsg)
+Kernel Ring Buffer - Never fills
+First logs generated by the system
+
+dmesg is pulled from the kernel ring buffer
+---------------------------------------------------------------------------------------------
+
+most logs are in /var/log
+/etc/rsyslog.conf is the config file
+/usr/sbin/rsyslogd is the logging daemon
+
+/etc/rsyslog.conf
+
+Log entries follow syslog standard facility.severity
+facility = what program, or part of system, log is from
+severity = urgency
+
+FACILITY CODES
+0   kernel messages
+1   user-level messages
+2   mail system
+3   system daemons
+4   security/authorization messages
+5   messages generated internally by syslogd
+6   line printer subsystem
+7   network news subsystem
+8   UUCP subsystem
+9   clock daemon
+10  security/authorization messages
+11  FTP daemon
+12  NTP subsystem13|log audit
+...TRIMMED
+
+SEVERITY CODES
+0  emerg, panic:  Emergency: system is unusable
+1  alert:         Action must be taken immediately
+2  crit:          Critical conditions
+3  err, error:    Error conditions
+4  warn, warning: Warning conditions
+5  notice:        Normal but significant condition
+6  info:          Informational messages
+7  Debug:         Debug-level messages
+
+can view rsyslog by doing tail-n<number> /etc/rsyslog.conf
+rsyslog is separated by fields representing facility then severity(defines how severe it must be to log) seperated by a period where .no means ignore, and a semicolon means more rules are on that one line with a backslash for newline and = meaning only that thing and ! meaning not that and something below it and a comma specifying more facilities
+@@(tcp) or @(udp)<socket> is used for remote logging of facilities
+
+-Best Practices-
+Meaningful Naming Schema
+Separate logs logically and by precedence
+Sync time across network
+Control log access
+-Utilize cron jobs / scripts-
+logrotate keeps x amount of logs and does whatever is specified with them after
+/etc/logrotate.conf 
+How large to let files get. How long to keep them.
+
+USEFUL LOGGING COMMANDS
+tail -f - Continuously show end of file
+less /var/log/syslog - View Log in page viewer
+logger - Send a user generated message to system Log i.e. Starting Update
+> /var/log/messages - Wipes Logs
+Why do this as opposed to deleting/recreating files?
+last -f /var/log{wtmp,btmp} - Needed to view data files
+
+journalctl is used for systemd logs like getting the boots with journalctl --list-boots which lists boot ids that can be further looked into for actual logs
+journalctl -u ssh.service can be used to view the service logs
+
+use jq . <filename> for json files
+use xpath command ex. xpath -e '//@addr' <file>
+can use jq .<field to look at>(optionally add < > = to compare) <filename>
+
+=============================== MEMORY ANALYSIS =============================
+
+Volatile Memory
+
+Non-persistent
+Requires power to maintain the stored information; it retains its contents while powered on but when the power is interrupted, the stored data is immediately lost
+RAM
+
+Non-Volatile Memory
+
+Persistent
+Does not require a continuous power supply to retain the data stored in a computing device
+HDD
+USB
+
+WHY IS THIS IMPORTANT?
+
+Data that has not been stored on disk yet is present in memory
+Files that have been deleted or modified can be scraped from RAM and used as evidence or for timelining an attack
+
+Examples:
+Bash history is written to .bash_history once the terminal session is terminated, however each command that has been ran during the current terminal session resides in RAM and can be viewed using the bash plugin
+If the ~/.bash_history has been deleted, using the same method as above we can still retrieve all commands executed
+Logs that have been deleted or modified can be read and scraped from memory using the mfind mcat & mls plugins
+
+files reside in RAM even if they are deleted
+
+ORDER OF VOLATILITY - THE HALFLIFE OF DATA
+
+CPU registers, cache
+Routing table, ARP cache, process table, kernel stats, memory
+Temporary file systems
+Disk
+Remote logging and monitoring data
+Physical configuration, network topology
+Archival media - backups
+
+how a file is split up into memory (when in use by CPU, cache)
+reg  64bits
+L1   16kb
+L2   4mb
+L3   32mb
+RAM  32gb
+
+VOLATILITY
+
+Memory Analysis framework
+Volatility provides cross-platform solutions on Windows, Mac OSX, and Linux
+Each operating system has its own memory acquisition tool called Persistent Memory (pmem)
+Linpmem
+Winpmem
+OSXpmem
+
+Using standalone version of Volatility
+
+UNDERSTAND PROFILES AND PROFILE SELECTION/CREATION
+
+What is a profile?
+A Profile provides Volatility with a memory layout based on the kernel of the machine upon which it’s created. This ensures Volatility is able to parse the memory image appropriately and return expected data when given a command
+Volatility hosts a profile repository with most known Windows builds; however, their Linux profile selection is lacking
+Cloning the repository to a local machine is possible for offline analysis needs
+The best practice is to create your own profile for Linux machines
+
+use .\volatility_2.6_win64_standalone.exe -h to get the help file for volatility
+--plugins=PLUGINS;PLUGINS or just put plugins at the end of the command after the filename and seperate them with a semicolon if you have multiple
+--profile=PROFILENAME
+-f FILENAME
+imageinfo can get the profile needed to run on the file
+pstree shows processes in a tree format
+procdump -p <PID> dumps a process to an executable file, then use -D to specify where to put it 
+memdump -p <PID> get a memory dump of what the process did, use the same -D 
+use the sysinternals strings.exe to get all the actual human-readable information and put that in a file for dissection
+use notepad++ to view the file and search it using regex or keywords
+connections give the connections made currently in the file
+connscan shows current and closed tcp connection made over the device
+get suspected viruses filehashes and then put them in virustotal to check if they are malicious or not
+psscan to get physical memory address of processes
+dlllist will show all the dlls used
+dlldump grabs dlls and puts them in a file
+hivedump dumps an entire registry hive
+hivelist lists all hives
+dumpregistry just dumps the whole gosh darn registry
+
+use net use * \\live.sysinternals.com\tools to mount sysinternals and use said tools
+
+========================= ACTIVE DIRECTORY ============================
+
+gwmi win32_service | where { $_.name -like "adws" -or $_.name -like "kdc" -or $_.name -like "netlogon" -or $_.name -like "dns" } | select name,state,status
+this script checks if certain domain controller services are running
+
+get-addomaincontroller
+this command checks if the current computer is a domain controller and if so what its domain is 
+
+get-addomain <domain name>
+this command diplays specific domain information
+
+get-adforest <domain name>
+this gets the forest for a specific domain
+
+get-smbshare
+this shows what information is shared by the domain controller 
+
+active directory uses the module ActiveDirectory (got using get-module ActiveDirectory) along with get-command -module activedirectory to view commands for said module
+
+getadgroup -filter * 
+gets all groups and information about them
+
+get-adgroupmember -identity <domain group name> (adding a -recursive shows all members within a said group)
+can be used to view the data for a specific group
+
+GROUP POLICY OBJECT QUERIES
+gpresult
+Get-GPResultantSetOfPolicy
+
+HUNTING IN AD
+Who
+What
+Where
+When
+Why
+
+SUSPICIOUS ACTIVITY
+Unknown admin accounts
+Active outside normal work hours
+Nested groups
+Service accounts logging into hosts
+User accounts logging into critical infrastructure (i.e. Domain Controller)
+
+USER ENUMERATION FOR HUNTING PURPOSES
+  Methods
+CMD
+PowerShell
+Logs
+3rd party software
+
+POWERSHELL AD COMMANDS
+(VERB)-AD(NOUN)
+
+Examples
+Get-ADUser -filter * -property *
+New-ADUser -Name "Bad Guy" -PasswordNotRequired 1(1 means dont need one, 0 means need one) -Path "OU=3RD LPT,OU=CCO,OU=3RDBN,OU=WARRIORS,DC=ARMY,DC=WARRIORS"
+
+
+search-adaccount -accountdisabled shows disabled accounts (-accountexpired)
+
+========================= FINAL REVIEW ========================
+
+LINUX
+use last -f to read binaries
+Ask where am i, who am i, what can I do, what's happening, what is it, why is it happening, how is it happening, what's in there
+netstat or sudo ss -ntlp for network related stuff (sudo for permissions to view processes)
+ps -elf piped to grep port number to find suspicious ports or ips can use --forest for PIDs and --context, -A, and -B for getting information around a grep
+A CRON represents a cronjob which is ran by the user who owns it using (sudo) crontab -l -u <user> (sudo -l to check permissions), view var/spool/cron/crontabs/<user> to also view jobs along with /etc/cron.d
+can check timers, /tmp, /var/log/syslog, /etc/rsyslog.conf, /etc/profile(interactive login shell conf also uses /etc/profile.d), etc/bash.bashrc(interactive non-login shell conf) for persistence
+/etc/systemd/system can get service (daemon) files for systemd
+
+WINDOWS
+powershell and sysinternals are essential 
+use tcp-view to see ports n stuff or netstat -anob or get-nettcpconnection
+net use * \\hive.sysinternals.com/tools
+get-process with optionally get-process <processname> | select name, id, path for getting processes
+can use task manager or procmon or autoruns to view processes in the GUI
+artifacts in prefetch, userassist, recycle bin decrypt in rot13 for userassists
+runkeys are prime real estate for persistence and can be checked using get-item
+use task scheduler or autoruns to view scheduled tasks
+powershell profile files which can be test-path'd $profile.allusersallhosts
+mechanism means what caused what 
+
+BOTH
+ignore binaries, handles, and dlls, drivers
+names of things are fine but whats in them doesnt matter
