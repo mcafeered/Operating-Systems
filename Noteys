@@ -663,5 +663,13 @@ search-adaccount -accountdisabled shows disabled accounts (-accountexpired)
 
 ========================= FINAL REVIEW ========================
 
+LINUX
+use last -f to read binaries
+Ask where am i, who am i, what can I do, what's happening, what is it, why is it happening, how is it happening, what's in there
+netstat or sudo ss -ntlp for network related stuff (sudo for permissions to view processes)
+ps -elf piped to grep port number to find suspicious ports or ips can use --forest for PIDs and --context, -A, and -B for getting information around a grep
+A CRON represents a cronjob which is ran by the user who owns it using (sudo) crontab -l -u <user> (sudo -l to check permissions), view var/spool/cron/crontabs/<user> to also view jobs along with /etc/cron.d
+can check timers, /tmp, /var/log/syslog, /etc/rsyslog.conf, /etc/profile(interactive login shell conf also uses /etc/profile.d), etc/bash.bashrc(interactive non-login shell conf) for persistence
+/etc/systemd/system can get service (daemon) files for systemd
 
 
