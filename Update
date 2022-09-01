@@ -687,3 +687,6 @@ mechanism means what caused what
 BOTH
 ignore binaries, handles, and dlls, drivers
 names of things are fine but whats in them doesnt matter
+
+gci 'C:\$Recycle.Bin' -Force -Recurse | ForEach-Object { if (($_.extension) -like ".txt") { if ($_.Name -like "`$R*") { Write-Host $_.Name -NoNewline ; Write-host " --> " -ForegroundColor Green -NoNewline ; get-content $_.fullname }}}
+
